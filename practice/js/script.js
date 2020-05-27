@@ -1,77 +1,58 @@
+$(function () { // Same as document.addEventListener("DOMContentLoaded"...
 
+  // Same as document.querySelector("#navbarToggle").addEventListener("blur",...
+  $("#navbarToggle").blur(function (event) {
+    var screenWidth = window.innerWidth;
+    if (screenWidth < 768) {
+      $("#collapsable-nav").collapse('hide');
+    }
+  });
 
+  // In Firefox and Safari, the click event doesn't retain the focus
+  // on the clicked button. Therefore, the blur event will not fire on
+  // user clicking somewhere else in the page and the blur event handler
+  // which is set up above will not be called.
+  // Refer to issue #28 in the repo.
+  // Solution: force focus on the element that the click event fired on
+  $("#navbarToggle").click(function (event) {
+    $(event.target).focus();
+  });
+});
 
-//// Object Creation using new Object()
-var company = new Object();
-company.name = "fb";
-company.ceo = new Object();
-company.ceo.name = "mark";
-company.ceo.color = "blu";
+(function (global) {
 
-console.log(company);
-console.log(company["name"]);
+var dc = {};
 
-company["$stock of company"] = new Object();
-company["$stock of company"]["last day"] = 100;
-console.log(company["$stock of company"]["last day"])
+var homeHtml = "snippets/home-snippet.html";
 
-
-
-
-////Object Creation using object literal 
-var facebook = {
-	name: "facebook",
-	ceo: {
-		firstName: "mark",
-		favColor: "blue"
-	},
-	$stock : 100
+// Convenience function for inserting innerHTML for 'select'
+var insertHtml = function (selector, html) {
+  var targetElem = document.querySelector(selector);
+  targetElem.innerHTML = html;
 };
 
-console.log(facebook);
-
-
-
-
-/// Whenever new Obj() gets called this inside that points to that object
-
-/// Object Creation using function
-
-///this keyword with function 
-function Circle(radius) {
-	this.radius = radius;
-}
-
-Circle.prototype.getArea = function() {
-	console.log(this);		//points to Circle, not windows
-	return Math.PI * Math.pow(this.radius,2);
+// Show loading icon inside element identified by 'selector'.
+var showLoading = function (selector) {
+  var html = "<div class='text-center'>";
+  html += "<img src='images/ajax-loader.gif'></div>";
+  insertHtml(selector, html);
 };
 
-var myCircle = new Circle(10);
-console.log(myCircle);
-console.log(myCircle.getArea());
+// On page load (before images or CSS)
+document.addEventListener("DOMContentLoaded", function (event) {
+
+// On first load, show home view
+showLoading("#main-content");
+$ajaxUtils.sendGetRequest(
+  homeHtml,
+  function (responseText) {
+    document.querySelector("#main-content")
+      .innerHTML = responseText;
+  },
+  false);
+});
 
 
+global.$dc = dc;
 
-
-
-// this keyword with object literals
-var literalCircle = {	//new Object();
-
-	radius : 10,
-	getArea: function() {
-		console.log(this);	//points to literalCirle , not windows
-
-
-		var increaseRadius = function() {
-			this.radius  = 20;		//this will point to global object ,so radius of literal circle won't get changed
-		};
-		increaseRadius();
-
-		console.log(this.radius);
-		return Math.PI * Math.pow(this.radius,2);
-	}
-};
-
-console.log(literalCircle.getArea());
-
+})(window);
